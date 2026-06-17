@@ -115,9 +115,10 @@ def _content_type(path: Path) -> str:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="박춘배 챗봇 로컬 서버")
-    parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--port", type=int, default=8000)
+    parser = argparse.ArgumentParser(description="박춘배 챗봇 서버")
+    # Render 등 호스트는 0.0.0.0 바인딩과 $PORT 환경변수를 요구한다. 로컬도 그대로 동작한다.
+    parser.add_argument("--host", default=os.environ.get("HOST", "0.0.0.0"))
+    parser.add_argument("--port", type=int, default=int(os.environ.get("PORT", "8000")))
     args = parser.parse_args()
     server = ThreadingHTTPServer((args.host, args.port), AppHandler)
     print(f"serving http://{args.host}:{args.port}  (mode: {PIPELINE.mode()})")

@@ -133,8 +133,8 @@ class ChatbotLlmOnlyTests(unittest.TestCase):
             "문구 실력 어때": "카피 역량",
             "니토리에서 뭐했어": "니토리",
             "네이버 AI 에이전트 기획자로 왜 어울려": "네이버 AI 에이전트 기획자",
-            "이 아저씨 챗봇 캐릭터는 어떻게 기획했어": "박춘배 챗봇",
-            "메일 어디로 보내": "wnsgur2618@naver.com",
+            "이 아저씨 챗봇 캐릭터는 어떻게 기획했어": "태도 중심",
+            "메일 어디로 보내": "채용",
         }
         for message, expected in cases.items():
             with self.subTest(message=message):

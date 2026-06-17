@@ -1,0 +1,20 @@
+# Render 배포 설정.
+# 1) https://render.com 에서 New > Blueprint 로 이 저장소를 연결하면 이 파일을 읽어 자동 구성된다.
+# 2) 배포 후 대시보드 Environment 에서 LLM_API_KEY 에 본인 무료 Gemini 키만 넣으면 된다.
+#    (https://aistudio.google.com/apikey 에서 무료 발급)
+# 챗봇은 표준 라이브러리만 써서 외부 의존성이 없다. 면접관은 키 입력 없이 URL만 열면 된다.
+services:
+  - type: web
+    name: chunbae
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    autoDeploy: true
+    envVars:
+      - key: LLM_PROVIDER
+        value: gemini
+      - key: LLM_MODEL
+        value: gemini-2.5-flash
+      - key: LLM_API_KEY
+        sync: false   # 대시보드에서 직접 입력(비밀값). 저장소에 올라가지 않는다.
