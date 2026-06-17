@@ -26,7 +26,12 @@ class SafetyFilterTests(unittest.TestCase):
     def test_redacts_excessive_profanity(self):
         result = self.filter.sanitize("씨발 진짜 병신 같네")
         self.assertIn("excessive_profanity", result.flags)
-        self.assertIn("[욕설 생략]", result.text)
+        self.assertIn("[욕설]", result.text)
+
+    def test_does_not_filter_hechiuda(self):
+        result = self.filter.sanitize("그를 해치우다")
+        self.assertEqual("그를 해치우다", result.text)
+        self.assertNotIn("threat", result.flags)
 
 
 if __name__ == "__main__":

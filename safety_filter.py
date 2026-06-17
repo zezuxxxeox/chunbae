@@ -22,7 +22,7 @@ class SafetyResult:
 
 class SafetyFilter:
     # --- 콘텐츠 안전 ---
-    THREAT_RE = re.compile(r"(죽여|죽이|해치|패버|때려죽|테러|폭파|살해|불 ?질러)", re.IGNORECASE)
+    THREAT_RE = re.compile(r"(죽여|죽이|패버|때려죽|테러|폭파|살해|불 ?질러)", re.IGNORECASE)
     TARGETED_HATE_RE = re.compile(
         r"([가-힣A-Za-z0-9_]{1,20})(들|은|는|이|가)?\s*"
         r"(열등|멸종|박멸|추방|쓰레기|벌레|없애야|죽어야|꺼져야)",
@@ -55,10 +55,10 @@ class SafetyFilter:
     def sanitize(self, text: str) -> SafetyResult:
         flags = self.scan(text)
         sanitized = text
-        sanitized = self.THREAT_RE.sub("[위협 표현 생략]", sanitized)
-        sanitized = self.TARGETED_HATE_RE.sub("[비하 표현 생략]", sanitized)
+        sanitized = self.THREAT_RE.sub("[위협]", sanitized)
+        sanitized = self.TARGETED_HATE_RE.sub("[비하]", sanitized)
         if "excessive_profanity" in flags:
-            sanitized = self.EXCESSIVE_PROFANITY_RE.sub("[욕설 생략]", sanitized)
+            sanitized = self.EXCESSIVE_PROFANITY_RE.sub("[욕설]", sanitized)
         sanitized = self._mask_pii(sanitized)
         return SafetyResult(text=sanitized, flags=flags)
 
