@@ -1,0 +1,43 @@
+# 데이터 수집 설정.
+#
+# 중요: 각 사이트는 robots.txt 와 이용약관을 직접 확인하고, 수집이 허용된
+# 곳만 terms_ok: true 로 바꿔서 돌려라. 기본값은 모두 false 라서, 이 파일을
+# 그대로 실행하면 아무것도 수집하지 않는다(안전 기본값).
+#
+# collector.py 는 매 요청마다 robots.txt 를 확인하고, 막힌 URL 은
+# logs/collector_failures.jsonl 에 남긴다.
+
+user_agent: "AjaeStyleResearchBot/1.0 (+style-analysis; respects robots.txt)"
+raw_dir: "data/raw"
+log_dir: "logs"
+
+# robots.txt 를 못 읽었을 때 수집할지 여부. 보수적으로 false.
+allow_if_robots_unavailable: false
+
+targets:
+  # 예시 1) 페이지네이션 게시판 (실제 수집 전 robots.txt/약관 확인 필수)
+  - name: example-board
+    terms_ok: false              # 확인 후 true 로
+    board_urls:
+      - "https://example.com/board/list?page={page}"
+    page_range: [1, 50]          # 1~50 페이지
+    max_items: 2000              # 이 사이트에서 최대 수집 개수
+    sleep_interval: 1.5          # 요청 간 대기(초). 서버 부담 줄이기
+    content_type: post
+    render_js: false             # JS 렌더링 필요할 때만 true (Playwright)
+    include_url_patterns:        # 글 상세 URL 만 추리는 정규식
+      - "/view\\?"
+    exclude_url_patterns:
+      - "/login"
+      - "/member"
+
+  # 예시 2) JS 렌더링이 필요한 사이트
+  - name: example-spa
+    terms_ok: false
+    board_urls:
+      - "https://example.org/community?page={page}"
+    page_range: [1, 20]
+    max_items: 500
+    sleep_interval: 2.0
+    content_type: post
+    render_js: true              # Playwright 설치 필요: pip install playwright && playwright install chromium

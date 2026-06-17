@@ -1,0 +1,25 @@
+# robots.txt 점검 결과 자동수집이 허용된(=Disallow 아님) 5~60대 비중 커뮤니티만 켠다.
+# 네이버/다음 카페, 클리앙, MLBPARK, 뽐뿌는 robots.txt 가 막아서 제외했다.
+user_agent: "AjaeStyleResearchBot/1.0 (+style-analysis; respects robots.txt)"
+raw_dir: "data/raw"
+log_dir: "logs"
+allow_if_robots_unavailable: false
+
+targets:
+  # 보배드림 자유게시판 (robots 허용 확인됨, 50~60대 남성 비중 높음)
+  # html_text.py 에 bobaedream 본문(div.bodyCont) 전용 추출기가 이미 있음.
+  - name: bobaedream-free
+    terms_ok: true
+    board_urls:
+      - "https://www.bobaedream.co.kr/list?code=freeb&page={page}"
+    page_range: [1, 2]
+    max_items: 15
+    sleep_interval: 1.5
+    content_type: post
+    render_js: false
+    include_url_patterns:
+      - "/view\\?code=freeb"
+    exclude_url_patterns:
+      - "/login"
+      - "/member"
+      - "writer"

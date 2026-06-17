@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>박춘배</title>
+    <link rel="preload" href="/assets/park-chunbae-avatar.png" as="image" />
+    <link rel="stylesheet" href="/styles.css?v=20260616-16" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="chat-shell" aria-label="박춘배 챗봇">
+        <header class="topbar">
+          <img class="brand-avatar" src="/assets/park-chunbae-avatar.png" alt="" />
+          <div class="brand-copy">
+            <h1>박춘배</h1>
+            <p>동네 아저씨 톤으로 답해주는 챗봇</p>
+          </div>
+        </header>
+
+        <div id="messages" class="messages" aria-live="polite">
+          <article class="message bot">
+            <img class="avatar" src="/assets/park-chunbae-avatar.png" alt="" />
+            <div class="bubble">
+              <p>어. 박춘배(朴春培)다. 올해로 예순둘 먹었고, 동네선 그냥 춘배아재라 부른다. 오빠나 형님이라 불러주면 참 좋으련만 ㅡㅡ. 그나저나 제준혁이라는 젊은 친구가 날더러 자기 얘기 좀 해달라지 뭐냐. 그 친구 작업물이든 이력이든, 궁금한 거 있으면 그냥 물어봐라.</p>
+            </div>
+          </article>
+        </div>
+
+        <form id="chatForm" class="composer">
+          <div class="quick-actions" aria-label="면접관 예상 질문 자동완성" aria-hidden="true">
+            <button type="button" data-message="제준혁 포트폴리오를 3문장으로 요약해줘" data-keywords="포폴 포트폴리오 요약 소개 전체 강점 제준혁">
+              <span>제준혁 포트폴리오를 3문장으로 요약해줘</span>
+            </button>
+            <button type="button" data-message="대표 작업 세 개만 핵심으로 알려줘" data-keywords="대표작 대표 작업 프로젝트 결과물 작업물 세개 3개">
+              <span>대표 작업 세 개만 핵심으로 알려줘</span>
+            </button>
+            <button type="button" data-message="카피 역량은 어떤 결과로 증명돼?" data-keywords="카피 문구 광고 댓글 문장 말맛 재치 네이밍 수상">
+              <span>카피 역량은 어떤 결과로 증명돼?</span>
+            </button>
+            <button type="button" data-message="니토리코리아에서 맡은 실무가 뭐야?" data-keywords="니토리 실무 경험 경력 마케팅 광고선전부 이벤트">
+              <span>니토리코리아에서 맡은 실무가 뭐야?</span>
+            </button>
+            <button type="button" data-message="데이터 분석 역량은 어디서 보여?" data-keywords="데이터 분석 기술스택 스택 python voc 감정분석 토픽모델링">
+              <span>데이터 분석 역량은 어디서 보여?</span>
+            </button>
+            <button type="button" data-message="네이버 AI 에이전트 기획자로 왜 어울려?" data-keywords="네이버 ai 에이전트 기획자 지원동기 핏 fit 어울려 강점 대화 ux">
+              <span>네이버 AI 에이전트 기획자로 왜 어울려?</span>
+            </button>
+            <button type="button" data-message="이 아저씨 챗봇 캐릭터는 어떻게 기획했어?" data-keywords="캐릭터 기획 챗봇 기획 에이전트 설계 박춘배 페르소나 토큰">
+              <span>이 아저씨 챗봇 캐릭터는 어떻게 기획했어?</span>
+            </button>
+            <button type="button" data-message="연락 가능한 포트폴리오 링크와 이메일 알려줘" data-keywords="연락 링크 사이트 이메일 메일 github 깃허브 주소">
+              <span>연락 가능한 포트폴리오 링크와 이메일 알려줘</span>
+            </button>
+          </div>
+          <div class="composer-box">
+            <textarea
+              id="messageInput"
+              name="message"
+              rows="1"
+              placeholder="박춘배에게 물어보기"
+              autocomplete="off"
+              required
+            ></textarea>
+            <button type="submit" aria-label="전송">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 4.75 19.25 12 17.84 13.41 13 8.58V20H11V8.58L6.16 13.41 4.75 12 12 4.75Z" />
+              </svg>
+            </button>
+          </div>
+        </form>
+      </section>
+    </main>
+    <script src="/app.js?v=20260617-2"></script>
+  </body>
+</html>
