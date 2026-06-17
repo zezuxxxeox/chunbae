@@ -50,12 +50,12 @@ function appendText(messageEl, text) {
 function friendlyErrorMessage(error) {
   const message = String(error?.message || "");
   if (message.includes("429") || message.toLowerCase().includes("quota")) {
-    return "지금 무료 LLM 사용량이 잠깐 막혔습니다. 잠시 뒤 다시 물어봐라.";
+    return "지금 공짜 LLM이 좀 막혔다 ㅡㅡ. 조금 천천히, 잠시 뒤 다시 물어봐라. 급하면 입력창 눌러서 뜨는 질문을 골라 눌러봐라. 그건 막힘없이 바로 답한다.";
   }
   if (message.includes("LLM이 꺼져") || message.includes("LLM 설정")) {
-    return "LLM 설정이 아직 안 잡혔습니다. llm.env를 확인해라.";
+    return "LLM 설정이 아직 안 잡혔다. llm.env를 확인해라.";
   }
-  return "처리 중 문제가 생겼습니다. LLM 응답을 받지 못했습니다.";
+  return "처리 중에 잠깐 문제가 생겼다. 입력창 눌러서 뜨는 질문을 눌러보면 그건 바로 답한다.";
 }
 
 function scrollToBottom() {
@@ -225,6 +225,27 @@ quickButtons.forEach((button) => {
 });
 document.addEventListener("click", (event) => {
   if (!form.contains(event.target) && !input.value.trim()) closeQuickActions();
+});
+
+// 첫 접속 안내 팝업: 확인을 누르면 닫히고 챗봇이 나타난다(브라우저당 한 번만).
+const introNotice = document.querySelector("#introNotice");
+const noticeClose = document.querySelector("#noticeClose");
+if (introNotice) {
+  let seen = false;
+  try {
+    seen = localStorage.getItem("chunbae_notice_seen") === "1";
+  } catch (_) {
+    seen = false;
+  }
+  if (!seen) introNotice.hidden = false;
+}
+noticeClose?.addEventListener("click", () => {
+  if (introNotice) introNotice.hidden = true;
+  try {
+    localStorage.setItem("chunbae_notice_seen", "1");
+  } catch (_) {
+    /* localStorage 막혀 있어도 무시 */
+  }
 });
 
 autosize();
