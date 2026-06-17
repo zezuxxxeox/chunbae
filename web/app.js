@@ -227,25 +227,13 @@ document.addEventListener("click", (event) => {
   if (!form.contains(event.target) && !input.value.trim()) closeQuickActions();
 });
 
-// 첫 접속 안내 팝업: 확인을 누르면 닫히고 챗봇이 나타난다(브라우저당 한 번만).
+// 안내 팝업: 매 접속(새로고침 포함)마다 보여준다 -> 모든 방문자가 반드시 본다.
+// 확인을 누르면 닫히고 챗봇이 나타난다.
 const introNotice = document.querySelector("#introNotice");
 const noticeClose = document.querySelector("#noticeClose");
-if (introNotice) {
-  let seen = false;
-  try {
-    seen = localStorage.getItem("chunbae_notice_seen") === "1";
-  } catch (_) {
-    seen = false;
-  }
-  if (!seen) introNotice.hidden = false;
-}
+if (introNotice) introNotice.hidden = false;
 noticeClose?.addEventListener("click", () => {
   if (introNotice) introNotice.hidden = true;
-  try {
-    localStorage.setItem("chunbae_notice_seen", "1");
-  } catch (_) {
-    /* localStorage 막혀 있어도 무시 */
-  }
 });
 
 autosize();
