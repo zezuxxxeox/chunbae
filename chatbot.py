@@ -171,6 +171,7 @@ class ChatbotPipeline:
 TOPIC_HINTS = [
     (("취업", "면접", "이력서", "자소서", "회사", "직장", "이직"), "취업 준비"),
     (("배고", "밥", "먹", "아침", "점심", "저녁", "허기", "점메추", "메뉴", "뭐먹"), "식사/음식"),
+    (("뭐해", "뭐함", "뭐하냐", "머하냐", "뭐하니"), "일상 대화"),
     (("운동", "헬스", "걷", "뛰", "체력", "근육"), "운동"),
     (("공부", "시험", "숙제", "암기", "책"), "공부"),
     (("연애", "고백", "데이트", "이별", "사랑"), "연애"),
@@ -216,13 +217,24 @@ def _augment_user_message(message: str, history: list[dict] | None = None) -> st
         )
     for keywords, topic in TOPIC_HINTS:
         if any(keyword in compact for keyword in keywords):
+            extra = ""
+            if topic == "식사/음식":
+                extra = "짧게 넘기지 말고 메뉴 후보 2~4개, 고르는 기준, 바로 할 행동을 포함해라.\n"
+            elif topic == "일상 대화":
+                extra = "박춘배가 지금 뭘 하는지 캐릭터답게 답하고, 사용자가 이어서 물어볼 만한 방향을 제안해라.\n"
             return (
                 prefix +
                 f"[주제 힌트: {topic}]\n"
                 "이 주제에서 벗어나지 말고 답해라. 질문에 없는 음식/배고픔 얘기로 돌리지 마라.\n"
+                "한두 마디로 끊지 말고, 3~6문장으로 끝까지 마무리해라.\n"
+                f"{extra}"
                 f"사용자 말: {message}"
             )
-    return f"{prefix}[주제 힌트: 일반 고민]\n사용자 말: {message}"
+    return (
+        f"{prefix}[주제 힌트: 일반 고민]\n"
+        "한두 마디로 끊지 말고, 3~6문장으로 끝까지 마무리해라.\n"
+        f"사용자 말: {message}"
+    )
 
 
 UNKNOWN_PERSON_ALIASES = {

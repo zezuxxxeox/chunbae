@@ -60,7 +60,8 @@ class LLMConfig:
     api_key: str = ""
     timeout: float = 60.0
     temperature: float = 0.5
-    max_tokens: int = 768
+    max_tokens: int = 2048
+    max_continuations: int = 1
     reasoning_effort: str = ""
 
     @classmethod
@@ -92,7 +93,8 @@ class LLMConfig:
             api_key=api_key,
             timeout=float(os.getenv("LLM_TIMEOUT", "60")),
             temperature=float(os.getenv("LLM_TEMPERATURE", "0.5")),
-            max_tokens=int(os.getenv("LLM_MAX_TOKENS", "384")),
+            max_tokens=int(os.getenv("LLM_MAX_TOKENS", "2048")),
+            max_continuations=int(os.getenv("LLM_MAX_CONTINUATIONS", "1")),
             reasoning_effort=os.getenv("LLM_REASONING_EFFORT", "").strip(),
         )
 
@@ -108,37 +110,61 @@ class OpenAICompatibleClient:
         """비스트리밍 호출. 스트리밍이 답을 중간에 끊는 모델(gemini-2.5-flash 등)에서도
         항상 완전한 답을 받기 위해 쓴다."""
         endpoint = f"{self.config.api_base}/chat/completions"
-        payload = {
-            "model": self.config.model,
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_message},
-            ],
-            "temperature": self.config.temperature,
-            "max_tokens": self.config.max_tokens,
-        }
-        if self.config.reasoning_effort:
-            payload["reasoning_effort"] = self.config.reasoning_effort
-        data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
         headers = {"Content-Type": "application/json"}
         if self.config.api_key:
             headers["Authorization"] = f"Bearer {self.config.api_key}"
 
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_message},
+        ]
+        pieces: list[str] = []
+
+        for attempt in range(max(0, self.config.max_continuations) + 1):
+            payload = {
+                "model": self.config.model,
+                "messages": messages,
+                "temperature": self.config.temperature,
+                "max_tokens": self.config.max_tokens,
+            }
+            if self.config.reasoning_effort:
+                payload["reasoning_effort"] = self.config.reasoning_effort
+            body = self._post_json(endpoint, payload, headers)
+            choices = body.get("choices") or []
+            if not choices:
+                break
+            choice = choices[0]
+            message = choice.get("message") or {}
+            content = str(message.get("content") or "").strip()
+            if content:
+                pieces.append(content)
+            finish_reason = str(choice.get("finish_reason") or "").lower()
+            if finish_reason not in {"length", "max_tokens"}:
+                break
+            if attempt >= self.config.max_continuations or not content:
+                break
+            messages.append({"role": "assistant", "content": content})
+            messages.append({
+                "role": "user",
+                "content": (
+                    "방금 답이 길이 제한 때문에 중간에 끊겼다. "
+                    "이미 한 말은 반복하지 말고, 바로 이어서 남은 답을 끝까지 마무리해라."
+                ),
+            })
+
+        return "\n".join(piece for piece in pieces if piece).strip()
+
+    def _post_json(self, endpoint: str, payload: dict, headers: dict) -> dict:
+        data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
         request = urllib.request.Request(endpoint, data=data, headers=headers, method="POST")
         try:
             with urllib.request.urlopen(request, timeout=self.config.timeout) as response:
-                body = json.loads(response.read().decode("utf-8", errors="replace"))
+                return json.loads(response.read().decode("utf-8", errors="replace"))
         except urllib.error.HTTPError as exc:
             detail = exc.read().decode("utf-8", errors="replace")
             raise LLMRequestError(f"LLM API HTTP {exc.code}: {detail[:400]}") from exc
         except urllib.error.URLError as exc:
             raise LLMRequestError(f"LLM API 연결 실패: {exc}") from exc
-
-        choices = body.get("choices") or []
-        if not choices:
-            return ""
-        message = choices[0].get("message") or {}
-        return str(message.get("content") or "").strip()
 
     def chat_stream(self, system_prompt: str, user_message: str) -> Iterator[str]:
         endpoint = f"{self.config.api_base}/chat/completions"

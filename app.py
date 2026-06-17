@@ -35,7 +35,7 @@ from prompt_builder import build_system_prompt  # noqa: E402
 
 PIPELINE = ChatbotPipeline()
 DEFAULT_STYLE_INTENSITY = 5
-APP_VERSION = "chunbae-nonstream-20260617"
+APP_VERSION = "llm-length-continuation-20260618-2"
 
 
 class AppHandler(BaseHTTPRequestHandler):

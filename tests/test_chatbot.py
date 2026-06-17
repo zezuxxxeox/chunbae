@@ -8,11 +8,14 @@ from portfolio_answers import PortfolioAnswerBook
 class FakeClient:
     def __init__(self, text: str):
         self.text = text
+        self.last_user_message = ""
 
     def chat(self, _system_prompt: str, _user_message: str) -> str:
+        self.last_user_message = _user_message
         return self.text
 
     def complete(self, _system_prompt: str, _user_message: str) -> str:
+        self.last_user_message = _user_message
         return self.text
 
     def chat_stream(self, _system_prompt: str, _user_message: str):
@@ -123,6 +126,14 @@ class ChatbotLlmOnlyTests(unittest.TestCase):
         self.assertIn("그게누군데", result["reply"])
         self.assertIn("송해", result["reply"])
         self.assertIn("ㅡㅡ", result["reply"])
+
+    def test_short_casual_inputs_still_use_llm_with_length_instruction(self):
+        fake = FakeClient("오늘은 제육이나 국밥 중에 골라라. 물도 한 잔 마셔라.")
+        self.bot._llm_client = fake
+        result = self.bot.reply("점메추", intensity=5)
+        self.assertEqual(result["mode"], "llm")
+        self.assertIn("3~6문장", fake.last_user_message)
+        self.assertIn("메뉴 후보", fake.last_user_message)
 
     def test_portfolio_answer_prefers_more_specific_trigger(self):
         portfolio = PortfolioAnswerBook.from_items([
