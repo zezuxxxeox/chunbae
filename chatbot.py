@@ -22,7 +22,7 @@ from llm_client import LLMConfig, LLMConfigurationError, LLMRequestError, OpenAI
 from portfolio_answers import PortfolioAnswerBook
 from prompt_builder import build_system_prompt
 from safety_filter import SafetyFilter
-from style_engine import AjaeStyler, scrub_youth_slang
+from style_engine import AjaeStyler
 
 
 REFUSAL = (
@@ -119,27 +119,14 @@ class ChatbotPipeline:
             }
             return
 
-        mode = self.mode()
-        raw = ""
-
-        if mode != "llm":
+        if self.mode() != "llm":
             yield {"type": "error", "error": "LLM이 꺼져 있거나 설정이 없습니다. llm.env 설정을 확인해라."}
             return
 
-        shown = ""
+        # 스트리밍은 gemini-2.5-flash 등에서 답을 중간에 끊는 일이 있어,
+        # 답은 비스트리밍으로 '끝까지' 받은 뒤 스타일을 입히고, 화면에는 타이핑 효과로만 흘린다.
         try:
-            for chunk in self._llm_stream(incoming.text, intensity, clean_history):
-                raw += chunk
-                # 스트리밍 중간에도 '걍' 같은 젊은말이 한 글자도 안 보이게 즉시 되돌린다.
-                partial = scrub_youth_slang(self.safety.sanitize(raw).text)
-                if partial.startswith(shown):
-                    delta = partial[len(shown):]
-                else:
-                    delta = partial
-                    yield {"type": "replace", "text": ""}
-                if delta:
-                    yield {"type": "delta", "text": delta}
-                    shown = partial
+            raw = self._generate(incoming.text, intensity, clean_history)
         except (LLMConfigurationError, LLMRequestError) as exc:
             yield {"type": "error", "error": f"LLM 응답 실패: {exc}"}
             return
@@ -149,7 +136,8 @@ class ChatbotPipeline:
             return
 
         final = self._style_and_sanitize(raw, intensity, incoming.text)
-        yield {"type": "replace", "text": final.text}
+        for chunk in _chunk_text(final.text):
+            yield {"type": "delta", "text": chunk}
         yield {
             "type": "done",
             "mode": "llm",
@@ -161,13 +149,11 @@ class ChatbotPipeline:
     def _generate(self, message: str, intensity: int, history: list[dict]) -> str:
         if self.mode() != "llm":
             raise LLMConfigurationError("LLM 설정이 없습니다.")
-        text = self._client().chat(build_system_prompt(intensity), _augment_user_message(message, history))
+        # 비스트리밍 호출로 '끝까지' 받는다(스트리밍 중간 끊김 방지).
+        text = self._client().complete(build_system_prompt(intensity), _augment_user_message(message, history))
         if not text.strip():
             raise LLMRequestError("LLM이 빈 응답을 반환했습니다.")
         return text
-
-    def _llm_stream(self, message: str, intensity: int, history: list[dict]) -> Iterator[str]:
-        yield from self._client().chat_stream(build_system_prompt(intensity), _augment_user_message(message, history))
 
     def _client(self) -> OpenAICompatibleClient:
         if self._llm_client is None:

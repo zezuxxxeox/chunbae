@@ -60,7 +60,7 @@ class LLMConfig:
     api_key: str = ""
     timeout: float = 60.0
     temperature: float = 0.5
-    max_tokens: int = 384
+    max_tokens: int = 768
     reasoning_effort: str = ""
 
     @classmethod
@@ -103,6 +103,42 @@ class OpenAICompatibleClient:
 
     def chat(self, system_prompt: str, user_message: str) -> str:
         return "".join(self.chat_stream(system_prompt, user_message)).strip()
+
+    def complete(self, system_prompt: str, user_message: str) -> str:
+        """비스트리밍 호출. 스트리밍이 답을 중간에 끊는 모델(gemini-2.5-flash 등)에서도
+        항상 완전한 답을 받기 위해 쓴다."""
+        endpoint = f"{self.config.api_base}/chat/completions"
+        payload = {
+            "model": self.config.model,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_message},
+            ],
+            "temperature": self.config.temperature,
+            "max_tokens": self.config.max_tokens,
+        }
+        if self.config.reasoning_effort:
+            payload["reasoning_effort"] = self.config.reasoning_effort
+        data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        headers = {"Content-Type": "application/json"}
+        if self.config.api_key:
+            headers["Authorization"] = f"Bearer {self.config.api_key}"
+
+        request = urllib.request.Request(endpoint, data=data, headers=headers, method="POST")
+        try:
+            with urllib.request.urlopen(request, timeout=self.config.timeout) as response:
+                body = json.loads(response.read().decode("utf-8", errors="replace"))
+        except urllib.error.HTTPError as exc:
+            detail = exc.read().decode("utf-8", errors="replace")
+            raise LLMRequestError(f"LLM API HTTP {exc.code}: {detail[:400]}") from exc
+        except urllib.error.URLError as exc:
+            raise LLMRequestError(f"LLM API 연결 실패: {exc}") from exc
+
+        choices = body.get("choices") or []
+        if not choices:
+            return ""
+        message = choices[0].get("message") or {}
+        return str(message.get("content") or "").strip()
 
     def chat_stream(self, system_prompt: str, user_message: str) -> Iterator[str]:
         endpoint = f"{self.config.api_base}/chat/completions"

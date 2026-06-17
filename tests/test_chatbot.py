@@ -12,6 +12,9 @@ class FakeClient:
     def chat(self, _system_prompt: str, _user_message: str) -> str:
         return self.text
 
+    def complete(self, _system_prompt: str, _user_message: str) -> str:
+        return self.text
+
     def chat_stream(self, _system_prompt: str, _user_message: str):
         yield self.text
 
@@ -57,13 +60,16 @@ class ChatbotLlmOnlyTests(unittest.TestCase):
         events = list(self.bot.stream_reply("취업 준비 어떻게 해", intensity=4))
         self.assertEqual(events[-1]["type"], "done")
         self.assertEqual(events[-1]["mode"], "llm")
-        replaced = [e for e in events if e["type"] == "replace"]
-        self.assertTrue(replaced[-1]["text"].strip())
+        streamed = "".join(e["text"] for e in events if e["type"] == "delta")
+        self.assertTrue(streamed.strip())
 
     def test_streaming_scrubs_youth_slang_midstream(self):
         class ChunkClient:
             def chat(self, *_a):
-                return "그건 걍 이렇게 하면 된다"
+                return "그건 걍 이렇게 하면 된다. ㄹㅇ 노잼이다"
+
+            def complete(self, *_a):
+                return "그건 걍 이렇게 하면 된다. ㄹㅇ 노잼이다"
 
             def chat_stream(self, *_a):
                 for ch in "그건 걍 이렇게 하면 된다. ㄹㅇ 노잼이다":
