@@ -267,7 +267,7 @@ button,
   display: none;
 }
 
-.composer.quick-open .quick-actions {
+.quick-actions.quick-open {
   max-height: min(320px, calc(var(--app-height) - var(--composer-height) - 96px));
   opacity: 1;
   visibility: visible;
@@ -522,7 +522,7 @@ button,
     gap: 6px;
   }
 
-  .composer.quick-open .quick-actions {
+  .quick-actions.quick-open {
     max-height: min(330px, calc(var(--app-height) - var(--composer-height) - 88px));
     padding: 8px;
   }

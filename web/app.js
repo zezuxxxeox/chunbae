@@ -3,6 +3,7 @@ const input = document.querySelector("#messageInput");
 const messages = document.querySelector("#messages");
 const submitButton = form.querySelector(".composer-box button");
 const composerBox = form.querySelector(".composer-box");
+const chatShell = document.querySelector(".chat-shell");
 const quickActions = document.querySelector(".quick-actions");
 const quickButtons = [...document.querySelectorAll(".quick-actions button")];
 
@@ -13,6 +14,7 @@ let viewportRaf = 0;
 let composerRaf = 0;
 let scrollHideTimer = 0;
 let lastQuickSubmitAt = 0;
+let quickOpenTimer = 0;
 const EDITABLE_VALUE = "plaintext-only";
 
 function syncViewportHeight() {
@@ -34,8 +36,9 @@ function syncComposerHeight() {
   composerRaf = requestAnimationFrame(() => {
     const formRect = form.getBoundingClientRect();
     const boxRect = composerBox.getBoundingClientRect();
+    const shellRect = chatShell.getBoundingClientRect();
     const height = Math.ceil(formRect.height || 92);
-    const quickBottom = Math.max(68, Math.ceil(formRect.bottom - boxRect.top + 10));
+    const quickBottom = Math.max(82, Math.ceil(shellRect.bottom - boxRect.top + 24));
 
     document.documentElement.style.setProperty("--composer-height", `${height}px`);
     document.documentElement.style.setProperty("--quick-actions-bottom", `${quickBottom}px`);
@@ -124,16 +127,25 @@ function setInputEditable(isEditable) {
 }
 
 function openQuickActions() {
+  clearTimeout(quickOpenTimer);
   form.classList.add("quick-open");
+  quickActions?.classList.add("quick-open");
   quickActions?.setAttribute("aria-hidden", "false");
   updateSuggestions();
   syncComposerHeight();
 }
 
 function closeQuickActions() {
+  clearTimeout(quickOpenTimer);
   form.classList.remove("quick-open");
+  quickActions?.classList.remove("quick-open");
   quickActions?.setAttribute("aria-hidden", "true");
   syncComposerHeight();
+}
+
+function scheduleQuickActions() {
+  clearTimeout(quickOpenTimer);
+  quickOpenTimer = setTimeout(openQuickActions, 180);
 }
 
 function enableTyping() {
@@ -293,7 +305,7 @@ async function sendMessage(event) {
 
 // 고정질문은 입력창을 '직접 누를 때'만 펼친다.
 // (직접 타이핑하거나, 전송 후 자동 재포커스될 때는 펼치지 않는다)
-input.addEventListener("click", openQuickActions);
+input.addEventListener("click", scheduleQuickActions);
 input.addEventListener("pointerdown", enableTyping);
 input.addEventListener("focus", () => {
   enableTyping();
@@ -302,6 +314,7 @@ input.addEventListener("focus", () => {
     syncComposerHeight();
     scrollToBottom();
   }, 80);
+  scheduleQuickActions();
 });
 input.addEventListener("input", () => {
   updateSuggestions();
@@ -338,7 +351,9 @@ quickButtons.forEach((button) => {
   });
 });
 document.addEventListener("click", (event) => {
-  if (!form.contains(event.target) && !getInputText().trim()) closeQuickActions();
+  if (!form.contains(event.target) && !quickActions.contains(event.target) && !getInputText().trim()) {
+    closeQuickActions();
+  }
 });
 
 // 안내 팝업: 매 접속(새로고침 포함)마다 보여준다 -> 모든 방문자가 반드시 본다.
