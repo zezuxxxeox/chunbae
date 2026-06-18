@@ -517,9 +517,12 @@ button,
   }
 
   .quick-actions {
+    position: fixed;
     left: 14px;
     right: 14px;
+    bottom: calc(var(--keyboard-inset) + var(--composer-height) - 14px);
     gap: 6px;
+    z-index: 29;
   }
 
   .quick-actions.quick-open {
