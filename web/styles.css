@@ -12,6 +12,7 @@
   --green-soft: #e9fff3;
   --shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
   --desktop-panel-offset-x: 0px;
+  --app-height: 100svh;
 }
 
 * {
@@ -368,6 +369,7 @@ textarea {
   color: var(--text);
   background: transparent;
   padding: 8px 4px 8px 8px;
+  font-size: 16px; /* 16px 미만이면 iOS가 포커스 시 화면을 확대해 입력 포인트가 튄다 */
   line-height: 1.55;
   min-height: 40px;
   max-height: 180px;
@@ -411,14 +413,17 @@ textarea::placeholder {
 @media (max-width: 720px) {
   html,
   body {
+    width: 100%;
+    height: var(--app-height);
     min-height: 100svh;
+    overflow: hidden;
   }
 
   .app-shell {
     display: block;
     padding: 0;
-    min-height: 100svh;
-    height: 100svh;
+    min-height: 0;
+    height: var(--app-height);
     overflow: hidden;
   }
 
@@ -426,7 +431,7 @@ textarea::placeholder {
     position: fixed;
     inset: 0;
     width: 100vw;
-    height: 100svh;
+    height: var(--app-height);
     max-width: 100%;
     max-height: none;
     aspect-ratio: none;

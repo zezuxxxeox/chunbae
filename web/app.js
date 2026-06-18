@@ -9,6 +9,12 @@ const AVATAR_SRC = "/assets/park-chunbae-avatar.png";
 const HISTORY_LIMIT = 12;
 const conversationHistory = [];
 
+function syncViewportHeight() {
+  const viewport = window.visualViewport;
+  const height = viewport ? viewport.height : window.innerHeight;
+  document.documentElement.style.setProperty("--app-height", `${Math.round(height)}px`);
+}
+
 function addMessage(text, role, flags = []) {
   const article = document.createElement("article");
   article.className = `message ${role}`;
@@ -65,6 +71,7 @@ function scrollToBottom() {
 function autosize() {
   input.style.height = "auto";
   input.style.height = `${Math.min(input.scrollHeight, 180)}px`;
+  scrollToBottom();
 }
 
 function openQuickActions() {
@@ -236,5 +243,10 @@ if (introNotice) introNotice.hidden = false;
 noticeClose?.addEventListener("click", () => {
   if (introNotice) introNotice.hidden = true;
 });
+
+syncViewportHeight();
+window.addEventListener("resize", syncViewportHeight);
+window.visualViewport?.addEventListener("resize", syncViewportHeight);
+window.visualViewport?.addEventListener("scroll", syncViewportHeight);
 
 autosize();

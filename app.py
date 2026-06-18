@@ -35,7 +35,7 @@ from prompt_builder import build_system_prompt  # noqa: E402
 
 PIPELINE = ChatbotPipeline()
 DEFAULT_STYLE_INTENSITY = 5
-APP_VERSION = "llm-length-continuation-20260618-2"
+APP_VERSION = "mobile-keyboard-stability-20260618-3"
 
 
 class AppHandler(BaseHTTPRequestHandler):
