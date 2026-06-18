@@ -512,7 +512,8 @@ button,
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), #fff 24%);
     transform: translate3d(0, 0, 0);
     backface-visibility: hidden;
-    contain: layout paint;
+    overflow: visible;
+    will-change: transform;
   }
 
   .quick-actions {
