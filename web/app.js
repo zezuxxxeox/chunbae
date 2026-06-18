@@ -13,16 +13,18 @@ let viewportRaf = 0;
 let composerRaf = 0;
 let scrollHideTimer = 0;
 let lastQuickSubmitAt = 0;
+const EDITABLE_VALUE = "plaintext-only";
 
 function syncViewportHeight() {
   if (viewportRaf) cancelAnimationFrame(viewportRaf);
   viewportRaf = requestAnimationFrame(() => {
     const viewport = window.visualViewport;
-    const height = viewport ? viewport.height : window.innerHeight;
-    const offsetTop = viewport ? viewport.offsetTop : 0;
-    const keyboardInset = viewport ? Math.max(0, window.innerHeight - height - offsetTop) : 0;
+    const viewportHeight = viewport ? viewport.height : window.innerHeight;
+    const keyboardOpen = document.activeElement === input && viewportHeight < window.innerHeight - 80;
+    const appHeight = keyboardOpen ? viewportHeight : window.innerHeight;
+    const keyboardInset = keyboardOpen ? Math.max(0, window.innerHeight - viewportHeight) : 0;
 
-    document.documentElement.style.setProperty("--app-height", `${Math.round(height)}px`);
+    document.documentElement.style.setProperty("--app-height", `${Math.round(appHeight)}px`);
     document.documentElement.style.setProperty("--keyboard-inset", `${Math.round(keyboardInset)}px`);
   });
 }
@@ -107,6 +109,20 @@ function autosize() {
   syncComposerHeight();
 }
 
+function getInputText() {
+  return String(input.innerText || input.textContent || "").replace(/\u00a0/g, " ");
+}
+
+function setInputText(text) {
+  input.textContent = text;
+  autosize();
+}
+
+function setInputEditable(isEditable) {
+  input.setAttribute("contenteditable", isEditable ? EDITABLE_VALUE : "false");
+  input.setAttribute("aria-disabled", isEditable ? "false" : "true");
+}
+
 function openQuickActions() {
   form.classList.add("quick-open");
   quickActions?.setAttribute("aria-hidden", "false");
@@ -122,13 +138,13 @@ function closeQuickActions() {
 
 function enableTyping() {
   form.classList.remove("typing-idle");
-  input.readOnly = false;
+  setInputEditable(true);
 }
 
 function clearTypingFocus({ freezeInput = false } = {}) {
   if (freezeInput) {
     form.classList.add("typing-idle");
-    input.readOnly = true;
+    setInputEditable(false);
   }
   input.blur();
   const active = document.activeElement;
@@ -152,7 +168,7 @@ function normalizeText(text) {
 }
 
 function updateSuggestions() {
-  const query = normalizeText(input.value);
+  const query = normalizeText(getInputText());
   let shown = 0;
   quickButtons.forEach((button) => {
     const haystack = normalizeText(`${button.dataset.message || ""} ${button.dataset.keywords || ""}`);
@@ -241,8 +257,7 @@ async function submitMessage(rawMessage, { refocus = true } = {}) {
   if (!message) return;
 
   addMessage(message, "user");
-  input.value = "";
-  autosize();
+  setInputText("");
   closeQuickActions(); // 전송하면 고정질문 패널을 접는다(답변받을 때 안 펼쳐지게)
   setBusy(true);
 
@@ -273,7 +288,7 @@ async function submitMessage(rawMessage, { refocus = true } = {}) {
 
 async function sendMessage(event) {
   event.preventDefault();
-  await submitMessage(input.value);
+  await submitMessage(getInputText());
 }
 
 // 고정질문은 입력창을 '직접 누를 때'만 펼친다.
@@ -291,6 +306,11 @@ input.addEventListener("focus", () => {
 input.addEventListener("input", () => {
   updateSuggestions();
   autosize();
+});
+input.addEventListener("paste", (event) => {
+  event.preventDefault();
+  const text = event.clipboardData?.getData("text/plain") || "";
+  document.execCommand("insertText", false, text);
 });
 input.addEventListener("keydown", (event) => {
   if (event.key === "Enter" && !event.shiftKey) {
@@ -318,7 +338,7 @@ quickButtons.forEach((button) => {
   });
 });
 document.addEventListener("click", (event) => {
-  if (!form.contains(event.target) && !input.value.trim()) closeQuickActions();
+  if (!form.contains(event.target) && !getInputText().trim()) closeQuickActions();
 });
 
 // 안내 팝업: 매 접속(새로고침 포함)마다 보여준다 -> 모든 방문자가 반드시 본다.
@@ -337,6 +357,5 @@ if ("ResizeObserver" in window) {
 }
 window.addEventListener("resize", syncViewportHeight);
 window.visualViewport?.addEventListener("resize", syncViewportHeight);
-window.visualViewport?.addEventListener("scroll", syncViewportHeight);
 
 autosize();

@@ -40,7 +40,7 @@ body {
 }
 
 button,
-textarea {
+.message-input {
   font: inherit;
 }
 
@@ -123,6 +123,7 @@ textarea {
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+  overflow-anchor: none;
   padding: 22px 22px 18px;
   display: flex;
   flex-direction: column;
@@ -379,14 +380,14 @@ textarea {
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
-.composer.typing-idle textarea {
+.composer.typing-idle .message-input {
   caret-color: transparent;
 }
 
-textarea {
+.message-input {
   min-width: 0;
   flex: 1;
-  resize: none;
+  display: block;
   border: 0;
   outline: 0;
   color: var(--text);
@@ -396,10 +397,16 @@ textarea {
   line-height: 1.55;
   min-height: 40px;
   max-height: 180px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  -webkit-user-modify: read-write-plaintext-only;
 }
 
-textarea::placeholder {
+.message-input:empty::before {
+  content: attr(data-placeholder);
   color: #9ca3af;
+  pointer-events: none;
 }
 
 .composer-box button {
@@ -503,6 +510,9 @@ textarea::placeholder {
     border-top: 0;
     padding: 14px 14px calc(16px + env(safe-area-inset-bottom));
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), #fff 24%);
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    contain: layout paint;
   }
 
   .quick-actions {
@@ -611,14 +621,14 @@ textarea::placeholder {
 
 /* 그린 스크롤바 — 깔끔하고 인터랙티브하게 (메시지 영역) */
 .messages {
-  scrollbar-width: none;
+  scrollbar-width: thin;
   scrollbar-color: transparent transparent;
-  scrollbar-gutter: auto;
+  scrollbar-gutter: stable;
 }
 
 .messages::-webkit-scrollbar {
-  width: 0;
-  height: 0;
+  width: 8px;
+  height: 8px;
 }
 
 .messages::-webkit-scrollbar-track {
@@ -684,6 +694,6 @@ textarea::placeholder {
   outline-offset: -2px;
 }
 
-textarea {
+.message-input {
   caret-color: var(--green);
 }

@@ -7,7 +7,7 @@
     <link rel="preload" href="/assets/park-chunbae-avatar.png?v=filled-20260618" as="image" />
     <link rel="icon" type="image/png" href="/assets/park-chunbae-avatar.png?v=filled-20260618" />
     <link rel="apple-touch-icon" href="/assets/park-chunbae-avatar.png?v=filled-20260618" />
-    <link rel="stylesheet" href="/styles.css?v=20260618-10" />
+    <link rel="stylesheet" href="/styles.css?v=20260618-12" />
   </head>
   <body>
     <main class="app-shell">
@@ -51,14 +51,17 @@
             </button>
           </div>
           <div class="composer-box">
-            <textarea
+            <div
               id="messageInput"
+              class="message-input"
               name="message"
-              rows="1"
-              placeholder="박춘배에게 물어보기"
-              autocomplete="off"
-              required
-            ></textarea>
+              role="textbox"
+              aria-label="박춘배에게 물어보기"
+              aria-multiline="true"
+              contenteditable="plaintext-only"
+              data-placeholder="박춘배에게 물어보기"
+              spellcheck="false"
+            ></div>
             <button type="submit" aria-label="전송">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M12 4.75 19.25 12 17.84 13.41 13 8.58V20H11V8.58L6.16 13.41 4.75 12 12 4.75Z" />
@@ -79,6 +82,6 @@
       </div>
     </div>
 
-    <script src="/app.js?v=20260618-10"></script>
+    <script src="/app.js?v=20260618-12"></script>
   </body>
 </html>
