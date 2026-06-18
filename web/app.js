@@ -174,6 +174,7 @@ async function submitMessage(rawMessage, { refocus = true } = {}) {
   addMessage(message, "user");
   input.value = "";
   autosize();
+  closeQuickActions(); // 전송하면 고정질문 패널을 접는다(답변받을 때 안 펼쳐지게)
   setBusy(true);
 
   const botMessage = addMessage("어. 잠깐만.", "bot");
@@ -201,10 +202,10 @@ async function sendMessage(event) {
   await submitMessage(input.value);
 }
 
-input.addEventListener("focus", openQuickActions);
-input.addEventListener("click", openQuickActions); // 채팅창을 직접 누르면 다시 연다
+// 고정질문은 입력창을 '직접 누를 때'만 펼친다.
+// (직접 타이핑하거나, 전송 후 자동 재포커스될 때는 펼치지 않는다)
+input.addEventListener("click", openQuickActions);
 input.addEventListener("input", () => {
-  openQuickActions();
   updateSuggestions();
   autosize();
 });

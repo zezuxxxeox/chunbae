@@ -575,3 +575,40 @@ textarea::placeholder {
 .notice-card button:hover {
   background: var(--green-dark);
 }
+
+/* 그린 스크롤바 — 깔끔하고 인터랙티브하게 (메시지 영역) */
+.messages {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(3, 199, 90, 0.4) transparent;
+  scrollbar-gutter: stable;
+}
+
+.messages::-webkit-scrollbar {
+  width: 10px;
+}
+
+.messages::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 6px 0;
+}
+
+.messages::-webkit-scrollbar-thumb {
+  background: rgba(3, 199, 90, 0.32);
+  border: 3px solid #fff;
+  border-radius: 999px;
+  background-clip: padding-box;
+  min-height: 36px;
+  transition: background-color 0.18s ease;
+}
+
+.messages:hover::-webkit-scrollbar-thumb {
+  background: rgba(3, 199, 90, 0.55);
+}
+
+.messages::-webkit-scrollbar-thumb:hover {
+  background: var(--green);
+}
+
+.messages::-webkit-scrollbar-thumb:active {
+  background: var(--green-dark);
+}
