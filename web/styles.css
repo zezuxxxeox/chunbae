@@ -13,6 +13,7 @@
   --shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
   --desktop-panel-offset-x: 0px;
   --app-height: 100svh;
+  --viewport-offset-top: 0px;
   --keyboard-inset: 0px;
   --composer-height: 92px;
   --quick-actions-bottom: 74px;
@@ -452,6 +453,10 @@ button,
 
   .app-shell {
     display: block;
+    top: var(--viewport-offset-top);
+    right: 0;
+    bottom: auto;
+    left: 0;
     padding: 0;
     min-height: 0;
     height: var(--app-height);
@@ -459,10 +464,10 @@ button,
   }
 
   .chat-shell {
-    position: fixed;
+    position: absolute;
     inset: 0;
     width: 100vw;
-    height: var(--app-height);
+    height: 100%;
     max-width: 100%;
     max-height: none;
     aspect-ratio: none;
@@ -502,10 +507,10 @@ button,
   }
 
   .composer {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: var(--keyboard-inset);
+    position: relative;
+    left: auto;
+    right: auto;
+    bottom: auto;
     width: 100%;
     z-index: 30;
     border-top: 0;
@@ -518,10 +523,10 @@ button,
   }
 
   .quick-actions {
-    position: fixed;
+    position: absolute;
     left: 14px;
     right: 14px;
-    bottom: calc(var(--keyboard-inset) + var(--composer-height) + 3px);
+    bottom: calc(var(--composer-height) + 3px);
     gap: 6px;
     z-index: 29;
   }

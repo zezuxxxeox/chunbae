@@ -17,15 +17,21 @@ let lastQuickSubmitAt = 0;
 let quickOpenTimer = 0;
 const EDITABLE_VALUE = "plaintext-only";
 
+function isMobileLayout() {
+  return window.matchMedia("(max-width: 720px)").matches;
+}
+
 function syncViewportHeight() {
   if (viewportRaf) cancelAnimationFrame(viewportRaf);
   viewportRaf = requestAnimationFrame(() => {
     const viewport = window.visualViewport;
+    const isMobile = isMobileLayout();
     const viewportHeight = viewport ? viewport.height : window.innerHeight;
-    const keyboardOpen = document.activeElement === input && viewportHeight < window.innerHeight - 80;
-    const appHeight = keyboardOpen ? viewportHeight : window.innerHeight;
+    const viewportOffsetTop = viewport && isMobile ? viewport.offsetTop : 0;
+    const appHeight = isMobile && viewport ? viewportHeight : window.innerHeight;
 
     document.documentElement.style.setProperty("--app-height", `${Math.round(appHeight)}px`);
+    document.documentElement.style.setProperty("--viewport-offset-top", `${Math.round(viewportOffsetTop)}px`);
     document.documentElement.style.setProperty("--keyboard-inset", "0px");
   });
 }
@@ -123,6 +129,34 @@ function setInputText(text) {
 function setInputEditable(isEditable) {
   input.setAttribute("contenteditable", isEditable ? EDITABLE_VALUE : "false");
   input.setAttribute("aria-disabled", isEditable ? "false" : "true");
+}
+
+function placeCaretAtEnd() {
+  const selection = window.getSelection?.();
+  if (!selection) return;
+  const range = document.createRange();
+  range.selectNodeContents(input);
+  range.collapse(false);
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+function focusInputWithoutScroll() {
+  const scrollX = window.scrollX;
+  const scrollY = window.scrollY;
+  enableTyping();
+  try {
+    input.focus({ preventScroll: true });
+  } catch {
+    input.focus();
+  }
+  placeCaretAtEnd();
+  window.scrollTo(scrollX, scrollY);
+  requestAnimationFrame(() => {
+    window.scrollTo(scrollX, scrollY);
+    syncViewportHeight();
+    syncComposerHeight();
+  });
 }
 
 function openQuickActions() {
@@ -307,13 +341,21 @@ async function sendMessage(event) {
 // 고정질문은 입력창을 '직접 누를 때'만 펼친다.
 // (직접 타이핑하거나, 전송 후 자동 재포커스될 때는 펼치지 않는다)
 input.addEventListener("click", scheduleQuickActions);
-input.addEventListener("pointerdown", enableTyping);
+composerBox.addEventListener("pointerdown", (event) => {
+  if (event.target.closest("button")) return;
+  if (!isMobileLayout()) return;
+  event.preventDefault();
+  focusInputWithoutScroll();
+  scheduleQuickActions();
+});
+input.addEventListener("pointerdown", () => {
+  if (!isMobileLayout()) enableTyping();
+});
 input.addEventListener("focus", () => {
   enableTyping();
   setTimeout(() => {
     syncViewportHeight();
     syncComposerHeight();
-    scrollToBottom();
   }, 80);
   scheduleQuickActions();
 });
