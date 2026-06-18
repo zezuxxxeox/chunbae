@@ -6,7 +6,7 @@ const composerBox = form.querySelector(".composer-box");
 const quickActions = document.querySelector(".quick-actions");
 const quickButtons = [...document.querySelectorAll(".quick-actions button")];
 
-const AVATAR_SRC = "/assets/park-chunbae-avatar.png";
+const AVATAR_SRC = "/assets/park-chunbae-avatar.png?v=filled-20260618";
 const HISTORY_LIMIT = 12;
 const conversationHistory = [];
 let viewportRaf = 0;
