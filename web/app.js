@@ -403,6 +403,28 @@ document.addEventListener("click", (event) => {
 
 // 안내 팝업: 매 접속(새로고침 포함)마다 보여준다 -> 모든 방문자가 반드시 본다.
 // 확인을 누르면 닫히고 챗봇이 나타난다.
+function preventZoom(event) {
+  event.preventDefault();
+}
+
+document.addEventListener("gesturestart", preventZoom, { passive: false });
+document.addEventListener("gesturechange", preventZoom, { passive: false });
+document.addEventListener("gestureend", preventZoom, { passive: false });
+document.addEventListener(
+  "touchmove",
+  (event) => {
+    if (event.touches && event.touches.length > 1) preventZoom(event);
+  },
+  { passive: false }
+);
+document.addEventListener(
+  "wheel",
+  (event) => {
+    if (event.ctrlKey) preventZoom(event);
+  },
+  { passive: false }
+);
+
 const introNotice = document.querySelector("#introNotice");
 const noticeClose = document.querySelector("#noticeClose");
 if (introNotice) introNotice.hidden = false;
