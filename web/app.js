@@ -8,11 +8,29 @@ const quickButtons = [...document.querySelectorAll(".quick-actions button")];
 const AVATAR_SRC = "/assets/park-chunbae-avatar.png";
 const HISTORY_LIMIT = 12;
 const conversationHistory = [];
+let viewportRaf = 0;
+let composerRaf = 0;
+let scrollHideTimer = 0;
 
 function syncViewportHeight() {
-  const viewport = window.visualViewport;
-  const height = viewport ? viewport.height : window.innerHeight;
-  document.documentElement.style.setProperty("--app-height", `${Math.round(height)}px`);
+  if (viewportRaf) cancelAnimationFrame(viewportRaf);
+  viewportRaf = requestAnimationFrame(() => {
+    const viewport = window.visualViewport;
+    const height = viewport ? viewport.height : window.innerHeight;
+    const offsetTop = viewport ? viewport.offsetTop : 0;
+    const keyboardInset = viewport ? Math.max(0, window.innerHeight - height - offsetTop) : 0;
+
+    document.documentElement.style.setProperty("--app-height", `${Math.round(height)}px`);
+    document.documentElement.style.setProperty("--keyboard-inset", `${Math.round(keyboardInset)}px`);
+  });
+}
+
+function syncComposerHeight() {
+  if (composerRaf) cancelAnimationFrame(composerRaf);
+  composerRaf = requestAnimationFrame(() => {
+    const height = Math.ceil(form.getBoundingClientRect().height || 92);
+    document.documentElement.style.setProperty("--composer-height", `${height}px`);
+  });
 }
 
 function addMessage(text, role, flags = []) {
@@ -68,21 +86,31 @@ function scrollToBottom() {
   messages.scrollTop = messages.scrollHeight;
 }
 
+function markMessagesScrolling() {
+  messages.classList.add("is-scrolling");
+  clearTimeout(scrollHideTimer);
+  scrollHideTimer = setTimeout(() => {
+    messages.classList.remove("is-scrolling");
+  }, 800);
+}
+
 function autosize() {
   input.style.height = "auto";
   input.style.height = `${Math.min(input.scrollHeight, 180)}px`;
-  scrollToBottom();
+  syncComposerHeight();
 }
 
 function openQuickActions() {
   form.classList.add("quick-open");
   quickActions?.setAttribute("aria-hidden", "false");
   updateSuggestions();
+  syncComposerHeight();
 }
 
 function closeQuickActions() {
   form.classList.remove("quick-open");
   quickActions?.setAttribute("aria-hidden", "true");
+  syncComposerHeight();
 }
 
 function normalizeText(text) {
@@ -212,6 +240,13 @@ async function sendMessage(event) {
 // 고정질문은 입력창을 '직접 누를 때'만 펼친다.
 // (직접 타이핑하거나, 전송 후 자동 재포커스될 때는 펼치지 않는다)
 input.addEventListener("click", openQuickActions);
+input.addEventListener("focus", () => {
+  setTimeout(() => {
+    syncViewportHeight();
+    syncComposerHeight();
+    scrollToBottom();
+  }, 80);
+});
 input.addEventListener("input", () => {
   updateSuggestions();
   autosize();
@@ -224,6 +259,7 @@ input.addEventListener("keydown", (event) => {
   if (event.key === "Escape") closeQuickActions();
 });
 form.addEventListener("submit", sendMessage);
+messages.addEventListener("scroll", markMessagesScrolling, { passive: true });
 quickButtons.forEach((button) => {
   button.addEventListener("click", () => {
     closeQuickActions();
@@ -245,6 +281,10 @@ noticeClose?.addEventListener("click", () => {
 });
 
 syncViewportHeight();
+syncComposerHeight();
+if ("ResizeObserver" in window) {
+  new ResizeObserver(syncComposerHeight).observe(form);
+}
 window.addEventListener("resize", syncViewportHeight);
 window.visualViewport?.addEventListener("resize", syncViewportHeight);
 window.visualViewport?.addEventListener("scroll", syncViewportHeight);

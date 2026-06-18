@@ -13,6 +13,8 @@
   --shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
   --desktop-panel-offset-x: 0px;
   --app-height: 100svh;
+  --keyboard-inset: 0px;
+  --composer-height: 92px;
 }
 
 * {
@@ -26,6 +28,7 @@ body {
   background: #fff;
   color: var(--text);
   overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -447,7 +450,7 @@ textarea::placeholder {
   }
 
   .messages {
-    padding: 20px 16px 16px;
+    padding: 20px 16px calc(var(--composer-height) + 18px);
     gap: 14px;
   }
 
@@ -471,9 +474,12 @@ textarea::placeholder {
   }
 
   .composer {
-    position: sticky;
-    bottom: 0;
-    z-index: 20;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: var(--keyboard-inset);
+    width: 100%;
+    z-index: 30;
     border-top: 0;
     padding: 14px 14px calc(16px + env(safe-area-inset-bottom));
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), #fff 24%);
@@ -583,13 +589,14 @@ textarea::placeholder {
 
 /* 그린 스크롤바 — 깔끔하고 인터랙티브하게 (메시지 영역) */
 .messages {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(3, 199, 90, 0.4) transparent;
-  scrollbar-gutter: stable;
+  scrollbar-width: none;
+  scrollbar-color: transparent transparent;
+  scrollbar-gutter: auto;
 }
 
 .messages::-webkit-scrollbar {
-  width: 10px;
+  width: 0;
+  height: 0;
 }
 
 .messages::-webkit-scrollbar-track {
@@ -597,15 +604,33 @@ textarea::placeholder {
   margin: 6px 0;
 }
 
+.messages::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 .messages::-webkit-scrollbar-thumb {
-  background: rgba(3, 199, 90, 0.32);
-  border: 3px solid #fff;
+  background: transparent;
+  border: 2px solid transparent;
   border-radius: 999px;
   background-clip: padding-box;
   min-height: 36px;
   transition: background-color 0.18s ease;
 }
 
+.messages.is-scrolling,
+.messages:hover {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(3, 199, 90, 0.45) transparent;
+}
+
+.messages.is-scrolling::-webkit-scrollbar,
+.messages:hover::-webkit-scrollbar {
+  width: 8px;
+}
+
+.messages.is-scrolling::-webkit-scrollbar-thumb,
 .messages:hover::-webkit-scrollbar-thumb {
   background: rgba(3, 199, 90, 0.55);
 }
