@@ -400,6 +400,7 @@ button,
   overflow-y: auto;
   white-space: pre-wrap;
   word-break: break-word;
+  touch-action: manipulation;
   -webkit-user-modify: read-write-plaintext-only;
 }
 

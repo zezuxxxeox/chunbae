@@ -24,10 +24,9 @@ function syncViewportHeight() {
     const viewportHeight = viewport ? viewport.height : window.innerHeight;
     const keyboardOpen = document.activeElement === input && viewportHeight < window.innerHeight - 80;
     const appHeight = keyboardOpen ? viewportHeight : window.innerHeight;
-    const keyboardInset = keyboardOpen ? Math.max(0, window.innerHeight - viewportHeight) : 0;
 
     document.documentElement.style.setProperty("--app-height", `${Math.round(appHeight)}px`);
-    document.documentElement.style.setProperty("--keyboard-inset", `${Math.round(keyboardInset)}px`);
+    document.documentElement.style.setProperty("--keyboard-inset", "0px");
   });
 }
 
@@ -264,13 +263,15 @@ function setBusy(isBusy) {
   });
 }
 
-async function submitMessage(rawMessage, { refocus = true } = {}) {
+async function submitMessage(rawMessage, { refocus = false } = {}) {
   const message = rawMessage.trim();
   if (!message) return;
 
   addMessage(message, "user");
   setInputText("");
   closeQuickActions(); // 전송하면 고정질문 패널을 접는다(답변받을 때 안 펼쳐지게)
+  clearTypingFocus({ freezeInput: true });
+  syncViewportHeight();
   setBusy(true);
 
   const botMessage = addMessage("어. 잠깐만.", "bot");
