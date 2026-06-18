@@ -612,3 +612,26 @@ textarea::placeholder {
 .messages::-webkit-scrollbar-thumb:active {
   background: var(--green-dark);
 }
+
+/* 모바일에서 탭할 때 뜨는 파란 하이라이트 / 포커스 잔상 / 파란 캐럿 제거 */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.quick-actions button:focus,
+.composer-box button:focus,
+.notice-card button:focus {
+  outline: none;
+}
+
+/* 키보드 사용자용 포커스는 초록으로(접근성 유지) */
+.quick-actions button:focus-visible,
+.composer-box button:focus-visible,
+.notice-card button:focus-visible {
+  outline: 2px solid rgba(3, 199, 90, 0.7);
+  outline-offset: -2px;
+}
+
+textarea {
+  caret-color: var(--green);
+}
