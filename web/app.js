@@ -11,6 +11,7 @@ const conversationHistory = [];
 let viewportRaf = 0;
 let composerRaf = 0;
 let scrollHideTimer = 0;
+let lastQuickSubmitAt = 0;
 
 function syncViewportHeight() {
   if (viewportRaf) cancelAnimationFrame(viewportRaf);
@@ -113,13 +114,31 @@ function closeQuickActions() {
   syncComposerHeight();
 }
 
-function clearTypingFocus() {
+function enableTyping() {
+  form.classList.remove("typing-idle");
+  input.readOnly = false;
+}
+
+function clearTypingFocus({ freezeInput = false } = {}) {
+  if (freezeInput) {
+    form.classList.add("typing-idle");
+    input.readOnly = true;
+  }
   input.blur();
   const active = document.activeElement;
   if (active instanceof HTMLElement && active !== document.body) {
     active.blur();
   }
   window.getSelection?.().removeAllRanges();
+}
+
+function submitQuickAction(button) {
+  const now = Date.now();
+  if (now - lastQuickSubmitAt < 450) return;
+  lastQuickSubmitAt = now;
+  closeQuickActions();
+  clearTypingFocus({ freezeInput: true });
+  submitMessage(button.dataset.message || button.textContent || "", { refocus: false });
 }
 
 function normalizeText(text) {
@@ -240,8 +259,8 @@ async function submitMessage(rawMessage, { refocus = true } = {}) {
     if (refocus) {
       input.focus();
     } else {
-      clearTypingFocus();
-      requestAnimationFrame(clearTypingFocus);
+      clearTypingFocus({ freezeInput: true });
+      requestAnimationFrame(() => clearTypingFocus({ freezeInput: true }));
     }
   }
 }
@@ -254,7 +273,9 @@ async function sendMessage(event) {
 // 고정질문은 입력창을 '직접 누를 때'만 펼친다.
 // (직접 타이핑하거나, 전송 후 자동 재포커스될 때는 펼치지 않는다)
 input.addEventListener("click", openQuickActions);
+input.addEventListener("pointerdown", enableTyping);
 input.addEventListener("focus", () => {
+  enableTyping();
   setTimeout(() => {
     syncViewportHeight();
     syncComposerHeight();
@@ -277,11 +298,17 @@ messages.addEventListener("scroll", markMessagesScrolling, { passive: true });
 quickButtons.forEach((button) => {
   button.tabIndex = -1;
   button.addEventListener("mousedown", (event) => event.preventDefault());
-  button.addEventListener("pointerdown", clearTypingFocus);
-  button.addEventListener("click", () => {
-    closeQuickActions();
-    clearTypingFocus(); // 고정질문 버튼에도 커서/포커스가 남지 않게 비운다
-    submitMessage(button.dataset.message || button.textContent || "", { refocus: false });
+  button.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    clearTypingFocus({ freezeInput: true });
+  });
+  button.addEventListener("pointerup", (event) => {
+    event.preventDefault();
+    submitQuickAction(button);
+  });
+  button.addEventListener("click", (event) => {
+    event.preventDefault();
+    submitQuickAction(button);
   });
 });
 document.addEventListener("click", (event) => {
