@@ -2,6 +2,7 @@ const form = document.querySelector("#chatForm");
 const input = document.querySelector("#messageInput");
 const messages = document.querySelector("#messages");
 const submitButton = form.querySelector(".composer-box button");
+const composerBox = form.querySelector(".composer-box");
 const quickActions = document.querySelector(".quick-actions");
 const quickButtons = [...document.querySelectorAll(".quick-actions button")];
 
@@ -29,8 +30,13 @@ function syncViewportHeight() {
 function syncComposerHeight() {
   if (composerRaf) cancelAnimationFrame(composerRaf);
   composerRaf = requestAnimationFrame(() => {
-    const height = Math.ceil(form.getBoundingClientRect().height || 92);
+    const formRect = form.getBoundingClientRect();
+    const boxRect = composerBox.getBoundingClientRect();
+    const height = Math.ceil(formRect.height || 92);
+    const quickBottom = Math.max(68, Math.ceil(formRect.bottom - boxRect.top + 10));
+
     document.documentElement.style.setProperty("--composer-height", `${height}px`);
+    document.documentElement.style.setProperty("--quick-actions-bottom", `${quickBottom}px`);
   });
 }
 
