@@ -28,11 +28,13 @@ function syncViewportHeight() {
     const isMobile = isMobileLayout();
     const viewportHeight = viewport ? viewport.height : window.innerHeight;
     const viewportOffsetTop = viewport && isMobile ? viewport.offsetTop : 0;
+    const keyboardOpen = isMobile && viewportHeight < window.innerHeight - 80;
     const appHeight = isMobile && viewport ? viewportHeight : window.innerHeight;
 
     document.documentElement.style.setProperty("--app-height", `${Math.round(appHeight)}px`);
     document.documentElement.style.setProperty("--viewport-offset-top", `${Math.round(viewportOffsetTop)}px`);
     document.documentElement.style.setProperty("--keyboard-inset", "0px");
+    document.documentElement.style.setProperty("--composer-bottom-padding", keyboardOpen ? "8px" : "16px");
   });
 }
 

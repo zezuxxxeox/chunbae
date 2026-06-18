@@ -16,6 +16,7 @@
   --viewport-offset-top: 0px;
   --keyboard-inset: 0px;
   --composer-height: 92px;
+  --composer-bottom-padding: 16px;
   --quick-actions-bottom: 74px;
 }
 
@@ -514,7 +515,7 @@ button,
     width: 100%;
     z-index: 30;
     border-top: 0;
-    padding: 14px 14px calc(16px + env(safe-area-inset-bottom));
+    padding: 14px 14px var(--composer-bottom-padding);
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), #fff 24%);
     transform: translate3d(0, 0, 0);
     backface-visibility: hidden;
