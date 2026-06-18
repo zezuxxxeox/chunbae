@@ -7,7 +7,7 @@
     <link rel="preload" href="/assets/park-chunbae-avatar.png?v=filled-20260618" as="image" />
     <link rel="icon" type="image/png" href="/assets/park-chunbae-avatar.png?v=filled-20260618" />
     <link rel="apple-touch-icon" href="/assets/park-chunbae-avatar.png?v=filled-20260618" />
-    <link rel="stylesheet" href="/styles.css?v=20260618-12" />
+    <link rel="stylesheet" href="/styles.css?v=20260618-13" />
   </head>
   <body>
     <main class="app-shell">
@@ -29,7 +29,7 @@
           </article>
         </div>
 
-        <form id="chatForm" class="composer">
+        <div id="chatForm" class="composer" role="form">
           <div class="quick-actions" aria-label="면접관 예상 질문 자동완성" aria-hidden="true">
             <button type="button" data-message="네이버 AI 에이전트 기획자로 왜 어울려?" data-keywords="네이버 ai 에이전트 기획자 지원동기 핏 fit 어울려 강점 대화 ux">
               <span>네이버 AI 에이전트 기획자로 왜 어울려?</span>
@@ -54,21 +54,24 @@
             <div
               id="messageInput"
               class="message-input"
-              name="message"
               role="textbox"
               aria-label="박춘배에게 물어보기"
               aria-multiline="true"
               contenteditable="plaintext-only"
               data-placeholder="박춘배에게 물어보기"
+              inputmode="text"
+              enterkeyhint="send"
+              autocorrect="off"
+              autocapitalize="off"
               spellcheck="false"
             ></div>
-            <button type="submit" aria-label="전송">
+            <button type="button" aria-label="전송">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M12 4.75 19.25 12 17.84 13.41 13 8.58V20H11V8.58L6.16 13.41 4.75 12 12 4.75Z" />
               </svg>
             </button>
           </div>
-        </form>
+        </div>
       </section>
     </main>
 
@@ -82,6 +85,6 @@
       </div>
     </div>
 
-    <script src="/app.js?v=20260618-12"></script>
+    <script src="/app.js?v=20260618-13"></script>
   </body>
 </html>

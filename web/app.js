@@ -287,7 +287,7 @@ async function submitMessage(rawMessage, { refocus = true } = {}) {
 }
 
 async function sendMessage(event) {
-  event.preventDefault();
+  event?.preventDefault?.();
   await submitMessage(getInputText());
 }
 
@@ -315,11 +315,11 @@ input.addEventListener("paste", (event) => {
 input.addEventListener("keydown", (event) => {
   if (event.key === "Enter" && !event.shiftKey) {
     event.preventDefault();
-    form.requestSubmit();
+    sendMessage(event);
   }
   if (event.key === "Escape") closeQuickActions();
 });
-form.addEventListener("submit", sendMessage);
+submitButton.addEventListener("click", sendMessage);
 messages.addEventListener("scroll", markMessagesScrolling, { passive: true });
 quickButtons.forEach((button) => {
   button.tabIndex = -1;

@@ -619,60 +619,31 @@ button,
   background: var(--green-dark);
 }
 
-/* 그린 스크롤바 — 깔끔하고 인터랙티브하게 (메시지 영역) */
-.messages {
-  scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
-  scrollbar-gutter: stable;
+/* 스크롤은 가능하게 두고, 스크롤바/위아래 화살표 UI는 전부 숨긴다. */
+.messages,
+.quick-actions,
+.message-input,
+.notice-card {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-.messages::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.messages::-webkit-scrollbar-track {
-  background: transparent;
-  margin: 6px 0;
-}
-
-.messages::-webkit-scrollbar-button {
+.messages::-webkit-scrollbar,
+.quick-actions::-webkit-scrollbar,
+.message-input::-webkit-scrollbar,
+.notice-card::-webkit-scrollbar {
   display: none;
   width: 0;
   height: 0;
 }
 
-.messages::-webkit-scrollbar-thumb {
-  background: transparent;
-  border: 2px solid transparent;
-  border-radius: 999px;
-  background-clip: padding-box;
-  min-height: 36px;
-  transition: background-color 0.18s ease;
-}
-
-.messages.is-scrolling,
-.messages:hover {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(3, 199, 90, 0.45) transparent;
-}
-
-.messages.is-scrolling::-webkit-scrollbar,
-.messages:hover::-webkit-scrollbar {
-  width: 8px;
-}
-
-.messages.is-scrolling::-webkit-scrollbar-thumb,
-.messages:hover::-webkit-scrollbar-thumb {
-  background: rgba(3, 199, 90, 0.55);
-}
-
-.messages::-webkit-scrollbar-thumb:hover {
-  background: var(--green);
-}
-
-.messages::-webkit-scrollbar-thumb:active {
-  background: var(--green-dark);
+.messages::-webkit-scrollbar-button,
+.quick-actions::-webkit-scrollbar-button,
+.message-input::-webkit-scrollbar-button,
+.notice-card::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 /* 모바일에서 탭할 때 뜨는 파란 하이라이트 / 포커스 잔상 / 파란 캐럿 제거 */
