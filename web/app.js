@@ -113,6 +113,15 @@ function closeQuickActions() {
   syncComposerHeight();
 }
 
+function clearTypingFocus() {
+  input.blur();
+  const active = document.activeElement;
+  if (active instanceof HTMLElement && active !== document.body) {
+    active.blur();
+  }
+  window.getSelection?.().removeAllRanges();
+}
+
 function normalizeText(text) {
   return String(text || "").toLowerCase().replace(/\s+/g, "");
 }
@@ -228,7 +237,12 @@ async function submitMessage(rawMessage, { refocus = true } = {}) {
     addMessage(friendlyErrorMessage(error), "bot", ["error"]);
   } finally {
     setBusy(false);
-    if (refocus) input.focus(); // 고정질문 전송 때는 재포커스하지 않아 닫힌 채로 둔다
+    if (refocus) {
+      input.focus();
+    } else {
+      clearTypingFocus();
+      requestAnimationFrame(clearTypingFocus);
+    }
   }
 }
 
@@ -261,9 +275,12 @@ input.addEventListener("keydown", (event) => {
 form.addEventListener("submit", sendMessage);
 messages.addEventListener("scroll", markMessagesScrolling, { passive: true });
 quickButtons.forEach((button) => {
+  button.tabIndex = -1;
+  button.addEventListener("mousedown", (event) => event.preventDefault());
+  button.addEventListener("pointerdown", clearTypingFocus);
   button.addEventListener("click", () => {
     closeQuickActions();
-    input.blur(); // 고정질문을 누르면 채팅창 포커스를 해제한다(다시 누르기 전까지 닫힌 채로)
+    clearTypingFocus(); // 고정질문 버튼에도 커서/포커스가 남지 않게 비운다
     submitMessage(button.dataset.message || button.textContent || "", { refocus: false });
   });
 });
